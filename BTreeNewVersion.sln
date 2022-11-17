@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BTreeNewVersion", "BTreeNewVersion\BTreeNewVersion.csproj", "{2BCE55EC-24E9-4B2D-BBC1-525227BCDF10}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BTreeTest", "BTreeTest\BTreeTest.csproj", "{32B4E1AF-4641-478B-85B4-305CF3F350BB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2BCE55EC-24E9-4B2D-BBC1-525227BCDF10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BCE55EC-24E9-4B2D-BBC1-525227BCDF10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BCE55EC-24E9-4B2D-BBC1-525227BCDF10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BCE55EC-24E9-4B2D-BBC1-525227BCDF10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32B4E1AF-4641-478B-85B4-305CF3F350BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32B4E1AF-4641-478B-85B4-305CF3F350BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32B4E1AF-4641-478B-85B4-305CF3F350BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32B4E1AF-4641-478B-85B4-305CF3F350BB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3DC46EBB-309A-4BF7-8ED3-126CDE92B590}
+	EndGlobalSection
+EndGlobal
