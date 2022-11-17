@@ -14,9 +14,6 @@ public static class Program
         btree.AddNewValue(140);
         btree.AddNewValue(160);
 
-
-
-
     }
 
 }
