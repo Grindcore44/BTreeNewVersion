@@ -19,7 +19,7 @@ class BTree<TValue>
         else
         {
             Node<TValue> currentNode = _head.SearchBottomNode(value);
-            Node<TValue> possibleHead =  currentNode.Add(new Cell<TValue>(value));
+            Node<TValue> possibleHead =  currentNode.Add(new DataTransferObject<TValue>(value, null));
             if (possibleHead != null)
             {
                 _head = possibleHead;

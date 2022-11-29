@@ -11,17 +11,20 @@ where TValue : IComparable<TValue>
 {
     private TValue _value;
 
-    public Cell(TValue value, Node<TValue>? leftNode = null, Node<TValue>? rightNode = null)
+    public Cell(TValue value, Cell<TValue>? next = null, Node<TValue>? leftNode = null, Node<TValue>? rightNode = null)
     {
         Value = value;
+        NextCell = next;
         LeftNode = leftNode;
         RightNode = rightNode;
+
     }
 
     public TValue Value { get; }
+    public Cell<TValue>? NextCell { get; private set; }
     public Node<TValue>? LeftNode { get; set; }
     public Node<TValue>? RightNode { get; set; }
-    public Cell<TValue>? NextCell { get; private set; }
+
 
 
     public int CountCell()
@@ -52,7 +55,6 @@ where TValue : IComparable<TValue>
             currentCell = currentCell.NextCell;
         }
         currentCell.NextCell = cell;
-        currentCell.NextCell.NextCell = null;
         return this;
 
     }
@@ -99,7 +101,23 @@ where TValue : IComparable<TValue>
         }
         return this;
     }
+    public void DeleteAllCellAfterIndex(int index)
+    {
+        if (index == 0)
+        {
+            NextCell = null;
+        }
+        else
+        {
+            Cell<TValue> currentCell = this;
+            for (int i = 1; i < index + 1; i++)
+            {
+                currentCell = currentCell.NextCell;
+            }
 
+            currentCell.NextCell = null;
+        }
+    }
     public Cell<TValue> GetCellByIndex(int index)
     {
         if (index < 0 || index > CountCell())
@@ -115,6 +133,28 @@ where TValue : IComparable<TValue>
         }
 
         return cell;
+    }
+
+    public void DeleteCellByValue(TValue value)
+    {
+        if (value.CompareTo(NextCell.Value) == 0)
+        {
+            NextCell = null;
+        }
+        else
+        {
+            Cell<TValue> currentCell = NextCell;
+            while (NextCell != null)
+            {
+                if (value.CompareTo(currentCell.NextCell.Value) == 0)
+                {
+                    currentCell.NextCell = null;
+                    break;
+                }
+                currentCell = currentCell.NextCell;
+            }
+        }
+       
     }
 }
 
