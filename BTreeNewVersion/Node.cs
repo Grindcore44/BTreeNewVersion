@@ -128,7 +128,7 @@ where TValue : IComparable<TValue>
             }
             else
             {
-                FirstCellInNode.LeftNode = dto.RightNode;
+                FirstCellInNode.RightNode = dto.LeftNode;
                 FirstCellInNode = FirstCellInNode.AddLastCell(new Cell<TValue>(dto.Value, null, dto.LeftNode, dto.RightNode));
             }
         }
@@ -302,7 +302,7 @@ where TValue : IComparable<TValue>
     {
         Value = value;
         NextCell = nextCell;
-        LeftNode = LeftNode;
-        RightNode = RightNode;
+        LeftNode = leftNode;
+        RightNode = rightNode;
     }
 }

@@ -1,4 +1,7 @@
 using BTreeNewVersion;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 
@@ -6,6 +9,210 @@ namespace BTreeTest;
 
 public class UnitTest1
 {
+    [Fact]
+    public void DataLossTest()
+    {
+        var btree = new BTree<int>(3);
+        var expectedCurrent = new List<int>();
+        var actualCurrent = new List<int>();
+        var numCount = 10000;
+        for (int i = 0; i < numCount; i++)
+        {
+            btree.AddNewValue(i);
+            expectedCurrent.Add(i);
+        }
+        expectedCurrent.Sort();
+
+        actualCurrent.AddRange(GetValueAfterHead(btree._head));
+
+        actualCurrent.AddRange(GetValueNode(btree._head.FirstCellInNode));
+        actualCurrent.Sort();
+
+        Assert.Equal(expectedCurrent, actualCurrent);
+    }
+    private IEnumerable<int> GetValueAfterHead(Node<int> node)
+    {
+        var cell = node.FirstCellInNode;
+
+        while (cell != null)
+        {
+            if (cell.LeftNode != null)
+            {
+                foreach (var item in GetValue(cell.LeftNode))
+                {
+                    yield return item;
+                }
+            }
+
+            if (cell.RightNode != null && cell.NextCell == null) 
+            {
+                foreach (var item in GetValue(cell.RightNode))
+                {
+                    yield return item;
+                }
+            }
+
+            cell = cell.NextCell;
+        }
+    }
+
+    private List<int> GetValue(Node<int> node)
+    {
+        var cell = node.FirstCellInNode;
+        var values = new List<int>();
+        values.AddRange(GetValueNode(cell));
+
+        while (cell != null)
+        {
+            if (cell.LeftNode is null)
+            {
+                break;
+            }
+
+            values.AddRange(GetValue(cell.LeftNode));
+            if (cell.NextCell is null)
+            {
+                values.AddRange(GetValue(cell.RightNode));
+            }
+            cell = cell.NextCell;
+        }
+
+        return values;
+    }
+
+    private List<int> GetValueNode(Cell<int> cell)
+    {
+        var list = new List<int>();
+        var count = cell.CountCell();
+        for (int i = 0; i < count; i++)
+        {
+            list.Add(cell.Value);
+            cell = cell.NextCell;
+        }
+        return list;
+    }
+
+    [Fact]
+    public void BalanceTest()
+    {
+        // arrange
+
+        var random = new Random((int)DateTime.Now.Ticks);
+
+        var btree = new BTree<int>(9);
+
+        // act
+
+        for (var i = 0; i < 10000; i++)
+        {
+            btree.AddNewValue(random.Next(int.MinValue, int.MaxValue));
+
+            // assert
+
+            var deeps = GetDeepAfterHead(btree._head).ToList();
+            if (deeps.Any())
+            {
+                var firstCount = deeps.First();
+                Assert.True(deeps.All(x => x == firstCount));
+            }
+        }
+    }
+
+    private IEnumerable<int> GetDeepAfterHead(Node<int> node)
+    {
+        var cell = node.FirstCellInNode;
+
+        while (cell != null)
+        {
+            if (cell.LeftNode is null)
+            {
+                break;
+            }
+
+            yield return GetDeep(cell.LeftNode);
+            yield return GetDeep(cell.RightNode);
+
+            cell = cell.NextCell;
+        }
+    }
+
+    private int GetDeep(Node<int> node)
+    {
+        var result = 1;
+        var cell = node.FirstCellInNode;
+        var deeps = new List<int>();
+
+        while (cell != null)
+        {
+            if (cell.LeftNode is null)
+            {
+                break;
+            }
+
+            deeps.Add(GetDeep(cell.LeftNode));
+            deeps.Add(GetDeep(cell.RightNode));
+
+            cell = cell.NextCell;
+        }
+
+        if (deeps.Count > 0)
+        {
+            var max = int.MinValue;
+
+            for (var i = 0; i < deeps.Count; i++)
+            {
+                if (deeps[0] > max)
+                {
+                    max = deeps[0];
+                }
+            }
+
+            result += max;
+        }
+
+        return result;
+
+    }
+    [Fact]
+    public void ParanteTest()
+    {
+        // arrange
+
+        var random = new Random((int)DateTime.Now.Ticks);
+
+        var btree = new BTree<int>(9);
+
+        // act
+
+        for (var i = 0; i < 100000; i++)
+        {
+            btree.AddNewValue(random.Next(int.MinValue, int.MaxValue));
+
+            // assert
+
+            AssertParant(btree._head);
+        }
+    }
+
+    private void AssertParant(Node<int> node)
+    {
+        var cell = node.FirstCellInNode;
+
+        while (cell != null)
+        {
+            if (cell.LeftNode is null)
+            {
+                break;
+            }
+
+            Assert.Equal(node, cell.LeftNode.ParentNode);
+            AssertParant(cell.LeftNode);
+            Assert.Equal(node, cell.RightNode!.ParentNode);
+            AssertParant(cell.RightNode);
+
+            cell = cell.NextCell;
+        }
+    }
     [Fact]
     public void AddLastTest()
     {
@@ -16,20 +223,14 @@ public class UnitTest1
         Cell<int> firstCell = new Cell<int>(valueFirstCell);
         Cell<int> secondCell = new Cell<int>(valueSecondCell);
         Cell<int> fhirdCell = new Cell<int>(valueFhirdCell);
-        Node<int> node = new Node<int>(3, firstCell);
-        Cell<int> firstCell2 = new Cell<int>(valueFirstCell);
-        Cell<int> secondCell2 = new Cell<int>(valueSecondCell);
-        Cell<int> fhirdCell2 = new Cell<int>(valueFhirdCell);
-        Node<int> node2 = new Node<int>(3, firstCell2);
+        Node<int> node = new Node<int>(4, firstCell);
+        var expectedCurrent = valueFhirdCell;
         // act
         node.FirstCellInNode.AddLastCell(secondCell);
         node.FirstCellInNode.AddLastCell(fhirdCell);
-        node2.FirstCellInNode.AddLastCell(secondCell2);
-        node2.FirstCellInNode.AddLastCell(fhirdCell2);
-        node.FirstCellInNode.AddLastCell(node2.FirstCellInNode);
-
+        var actualCurrent = node.FirstCellInNode.NextCell.NextCell.Value;
         // assert
-        Assert.Null(node.FirstCellInNode.NextCell.NextCell.NextCell.NextCell);
+        Assert.Equal(expectedCurrent, actualCurrent);
     }
 
     [Fact]

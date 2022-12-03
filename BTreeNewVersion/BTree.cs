@@ -1,6 +1,6 @@
 ﻿namespace BTreeNewVersion;
 
-class BTree<TValue>
+public class BTree<TValue>
     where TValue : IComparable<TValue>
 {
     public Node<TValue> _head;
