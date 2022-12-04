@@ -142,74 +142,59 @@ where TValue : IComparable<TValue>
     }
     public DataTransferObject<TValue> DivisionNode(int index, DataTransferObject<TValue> dto)
     {
-
         Node<TValue> rightNode = new Node<TValue>(MaxNumberCells + 1);
+        var halfCount = CountCellInNode / 2;
+        var beforeHalfCount = halfCount - 1;
+        var cellByHalfcount = HeadCell.GetCellByIndex(halfCount);
 
         if (index < 0)
         {
             if (CountCellInNode % 2 == 0)
             {
-                rightNode.HeadCell = HeadCell.GetCellByIndex(CountCellInNode / 2);
-
-                HeadCell.DeleteAllCellAfterIndex((CountCellInNode / 2) - 1);
+                rightNode.HeadCell = cellByHalfcount;
+                HeadCell.DeleteAllCellAfterIndex(beforeHalfCount);
             }
             else
             {
-                if (dto.Value.CompareTo(HeadCell.GetCellByIndex(CountCellInNode / 2).Value) == -1)
+                if (dto.Value.CompareTo(cellByHalfcount.Value) < 0)
                 {
-                    rightNode.HeadCell = HeadCell.GetCellByIndex(CountCellInNode / 2);
-
-                    HeadCell.DeleteAllCellAfterIndex((CountCellInNode / 2) - 1);
+                    rightNode.HeadCell = cellByHalfcount;
+                    HeadCell.DeleteAllCellAfterIndex(beforeHalfCount);
                 }
                 else
                 {
-                    rightNode.HeadCell = HeadCell.GetCellByIndex((CountCellInNode / 2) + 1);
-
-                    HeadCell.DeleteAllCellAfterIndex(CountCellInNode / 2);
+                    rightNode.HeadCell = cellByHalfcount.NextCell;
+                    HeadCell.DeleteAllCellAfterIndex(halfCount);
                 }
             }
         }
         else
         {
+
+            var newDto = new DataTransferObject<TValue>(HeadCell.GetCellByIndex(index).Value);
+            HeadCell.DeleteCellByIndex(index);
+            AddNewCellInNotFullNode(dto);
+            dto = newDto;
+            cellByHalfcount = HeadCell.GetCellByIndex(halfCount);
+
             if (CountCellInNode % 2 == 0)
             {
-                var newDto = new DataTransferObject<TValue>(HeadCell.GetCellByIndex(index).Value);
-                HeadCell.DeleteCellByIndex(index);
-                AddNewCellInNotFullNode(dto);
-                dto = newDto;
-
-                rightNode.HeadCell = HeadCell.GetCellByIndex(CountCellInNode / 2);
-
-
-                HeadCell.DeleteAllCellAfterIndex((CountCellInNode / 2) - 1);
+                rightNode.HeadCell = cellByHalfcount;
+                HeadCell.DeleteAllCellAfterIndex(beforeHalfCount);
             }
             else
             {
-                if (dto.Value.CompareTo(HeadCell.GetCellByIndex(index).Value) == -1)
+                if (dto.Value.CompareTo(HeadCell.GetCellByIndex(index).Value) < 0)
                 {
-                    var newDto = new DataTransferObject<TValue>(HeadCell.GetCellByIndex(index).Value);
-                    HeadCell.DeleteCellByIndex(index);
-                    AddNewCellInNotFullNode(dto);
-                    dto = newDto;
-
-                    rightNode.HeadCell = HeadCell.GetCellByIndex(CountCellInNode / 2);
-
-                    HeadCell.DeleteAllCellAfterIndex((CountCellInNode / 2) - 1);
+                    rightNode.HeadCell = cellByHalfcount;
+                    HeadCell.DeleteAllCellAfterIndex(beforeHalfCount);
                 }
-
                 else
                 {
-                    var newDto = new DataTransferObject<TValue>(HeadCell.GetCellByIndex(index).Value);
-                    HeadCell.DeleteCellByIndex(index);
-                    AddNewCellInNotFullNode(dto);
-                    dto = newDto;
-
-                    rightNode.HeadCell = HeadCell.GetCellByIndex((CountCellInNode / 2) - 1); ;
-
-                    HeadCell.DeleteAllCellAfterIndex((CountCellInNode / 2));
+                    rightNode.HeadCell = HeadCell.GetCellByIndex(beforeHalfCount);
+                    HeadCell.DeleteAllCellAfterIndex(halfCount);
                 }
             }
-
         }
 
         dto.LeftNode = this;
