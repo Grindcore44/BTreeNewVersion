@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace BTreeNewVersion;
+﻿namespace BTreeNewVersion;
 
 
 public class Node<TValue>
@@ -9,12 +7,12 @@ where TValue : IComparable<TValue>
     public Node(int relations, Cell<TValue>? cell = null)
     {
         MaxNumberCells = relations - 1;
-        FirstCellInNode = cell;
+        HeadCell = cell;
     }
     public int MaxNumberCells { get; }
-    public Cell<TValue> FirstCellInNode { get; private set; }
+    public Cell<TValue> HeadCell { get; private set; }
     public Node<TValue>? ParentNode { get; private set; }
-    public int CountCellInNode => FirstCellInNode.CountCell();
+    public int CountCellInNode => HeadCell.CountCell();
 
     public Node<TValue>? Add(DataTransferObject<TValue> dto)
     {
@@ -25,7 +23,7 @@ where TValue : IComparable<TValue>
         else
         {
 
-            DataTransferObject<TValue> newDto = DivisionNode(SearchMedianValue(dto), dto);
+            DataTransferObject<TValue> newDto = DivisionNode(SearchMedianValue(dto.Value), dto);
 
             if (ParentNode != null)
             {
@@ -46,7 +44,7 @@ where TValue : IComparable<TValue>
 
     public Node<TValue> SearchBottomNode(TValue value)
     {
-        var currentCell = FirstCellInNode;
+        var currentCell = HeadCell;
         for (int i = 0; i < CountCellInNode; i++)
         {
             int compareResult = value.CompareTo(currentCell.Value);
@@ -87,19 +85,19 @@ where TValue : IComparable<TValue>
 
     public void AddNewCellInNotFullNode(DataTransferObject<TValue> dto)
     {
-        if (FirstCellInNode == null)
+        if (HeadCell == null)
         {
-            FirstCellInNode = new Cell<TValue>(dto.Value, null, dto.LeftNode, dto.RightNode);
+            HeadCell = new Cell<TValue>(dto.Value, null, dto.LeftNode, dto.RightNode);
         }
         else
         {
-            Cell<TValue> currentCell = FirstCellInNode;
+            Cell<TValue> currentCell = HeadCell;
             int compareResult = dto.Value.CompareTo(currentCell.Value);
 
             if (compareResult == -1)
             {
                 SetLeftNode(0, dto.RightNode);
-                FirstCellInNode = FirstCellInNode.AddFirst(new Cell<TValue>(dto.Value, null, dto.LeftNode, dto.RightNode));
+                HeadCell = HeadCell.AddFirst(new Cell<TValue>(dto.Value, null, dto.LeftNode, dto.RightNode));
             }
             else if (currentCell.NextCell != null)
             {
@@ -111,7 +109,7 @@ where TValue : IComparable<TValue>
                     {
                         SetRightNode(i - 1, dto.LeftNode);
                         SetLeftNode(i, dto.RightNode);
-                        FirstCellInNode = FirstCellInNode.AddCellBeforeIndex(new Cell<TValue>(dto.Value, dto.NextCell, dto.LeftNode, dto.RightNode), i);
+                        HeadCell = HeadCell.AddCellBeforeIndex(new Cell<TValue>(dto.Value, dto.NextCell, dto.LeftNode, dto.RightNode), i);
 
                         break;
                     }
@@ -121,26 +119,26 @@ where TValue : IComparable<TValue>
                     if (currentCell.NextCell == null)
                     {
                         SetRightNode(CountCellInNode - 1, dto.LeftNode);
-                        FirstCellInNode = FirstCellInNode.AddLastCell(new Cell<TValue>(dto.Value, null, dto.LeftNode, dto.RightNode));
+                        HeadCell = HeadCell.AddLastCell(new Cell<TValue>(dto.Value, null, dto.LeftNode, dto.RightNode));
                         break;
                     }
                 }
             }
             else
             {
-                FirstCellInNode.RightNode = dto.LeftNode;
-                FirstCellInNode = FirstCellInNode.AddLastCell(new Cell<TValue>(dto.Value, null, dto.LeftNode, dto.RightNode));
+                HeadCell.RightNode = dto.LeftNode;
+                HeadCell = HeadCell.AddLastCell(new Cell<TValue>(dto.Value, null, dto.LeftNode, dto.RightNode));
             }
         }
     }
 
     public void SetLeftNode(int index, Node<TValue> node)
     {
-        FirstCellInNode.GetCellByIndex(index).LeftNode = node;
+        HeadCell.GetCellByIndex(index).LeftNode = node;
     }
     public void SetRightNode(int index, Node<TValue> node)
     {
-        FirstCellInNode.GetCellByIndex(index).RightNode = node;
+        HeadCell.GetCellByIndex(index).RightNode = node;
     }
     public DataTransferObject<TValue> DivisionNode(int index, DataTransferObject<TValue> dto)
     {
@@ -151,32 +149,23 @@ where TValue : IComparable<TValue>
         {
             if (CountCellInNode % 2 == 0)
             {
-                var firstCellLeftNode = FirstCellInNode.GetCellByIndex(CountCellInNode / 2);
-                rightNode.AddNewCellInNotFullNode(new DataTransferObject<TValue>
-                (firstCellLeftNode.Value, firstCellLeftNode.NextCell, firstCellLeftNode.LeftNode,
-                 firstCellLeftNode.RightNode));
+                rightNode.HeadCell = HeadCell.GetCellByIndex(CountCellInNode / 2);
 
-                FirstCellInNode.DeleteAllCellAfterIndex((CountCellInNode / 2) - 1);
+                HeadCell.DeleteAllCellAfterIndex((CountCellInNode / 2) - 1);
             }
             else
             {
-                if (dto.Value.CompareTo(FirstCellInNode.GetCellByIndex(CountCellInNode / 2).Value) == -1)
+                if (dto.Value.CompareTo(HeadCell.GetCellByIndex(CountCellInNode / 2).Value) == -1)
                 {
-                    var firstCellLeftNode = FirstCellInNode.GetCellByIndex(CountCellInNode / 2);
-                    rightNode.AddNewCellInNotFullNode(new DataTransferObject<TValue>
-                    (firstCellLeftNode.Value, firstCellLeftNode.NextCell, firstCellLeftNode.LeftNode,
-                    firstCellLeftNode.RightNode));
+                    rightNode.HeadCell = HeadCell.GetCellByIndex(CountCellInNode / 2);
 
-                    FirstCellInNode.DeleteAllCellAfterIndex((CountCellInNode / 2) - 1);
+                    HeadCell.DeleteAllCellAfterIndex((CountCellInNode / 2) - 1);
                 }
                 else
                 {
-                    var firstCellLeftNode = FirstCellInNode.GetCellByIndex((CountCellInNode / 2) + 1);
-                    rightNode.AddNewCellInNotFullNode(new DataTransferObject<TValue>
-                    (firstCellLeftNode.Value, firstCellLeftNode.NextCell, firstCellLeftNode.LeftNode,
-                    firstCellLeftNode.RightNode));
+                    rightNode.HeadCell = HeadCell.GetCellByIndex((CountCellInNode / 2) + 1);
 
-                    FirstCellInNode.DeleteAllCellAfterIndex(CountCellInNode / 2);
+                    HeadCell.DeleteAllCellAfterIndex(CountCellInNode / 2);
                 }
             }
         }
@@ -184,42 +173,40 @@ where TValue : IComparable<TValue>
         {
             if (CountCellInNode % 2 == 0)
             {
-                var newDto = new DataTransferObject<TValue>(FirstCellInNode.GetCellByIndex(index).Value);
-                FirstCellInNode.DeleteCellByIndex(index);
+                var newDto = new DataTransferObject<TValue>(HeadCell.GetCellByIndex(index).Value);
+                HeadCell.DeleteCellByIndex(index);
                 AddNewCellInNotFullNode(dto);
                 dto = newDto;
 
-                var firstCellLeftNode = FirstCellInNode.GetCellByIndex(CountCellInNode / 2);
-                rightNode.AddNewCellInNotFullNode(new DataTransferObject<TValue>(firstCellLeftNode.Value,
-                firstCellLeftNode.NextCell, firstCellLeftNode.LeftNode, firstCellLeftNode.RightNode));
-                FirstCellInNode.DeleteAllCellAfterIndex((CountCellInNode / 2) - 1);
+                rightNode.HeadCell = HeadCell.GetCellByIndex(CountCellInNode / 2);
+
+
+                HeadCell.DeleteAllCellAfterIndex((CountCellInNode / 2) - 1);
             }
             else
-            { 
-                if (dto.Value.CompareTo(FirstCellInNode.GetCellByIndex(index).Value) == -1)
+            {
+                if (dto.Value.CompareTo(HeadCell.GetCellByIndex(index).Value) == -1)
                 {
-                    var newDto = new DataTransferObject<TValue>(FirstCellInNode.GetCellByIndex(index).Value);
-                    FirstCellInNode.DeleteCellByIndex(index);
+                    var newDto = new DataTransferObject<TValue>(HeadCell.GetCellByIndex(index).Value);
+                    HeadCell.DeleteCellByIndex(index);
                     AddNewCellInNotFullNode(dto);
                     dto = newDto;
 
-                    var firstCellLeftNode = FirstCellInNode.GetCellByIndex(CountCellInNode / 2);
-                    rightNode.AddNewCellInNotFullNode(new DataTransferObject<TValue>(firstCellLeftNode.Value,
-                    firstCellLeftNode.NextCell, firstCellLeftNode.LeftNode, firstCellLeftNode.RightNode));
-                    FirstCellInNode.DeleteAllCellAfterIndex((CountCellInNode / 2) - 1);
+                    rightNode.HeadCell = HeadCell.GetCellByIndex(CountCellInNode / 2);
+
+                    HeadCell.DeleteAllCellAfterIndex((CountCellInNode / 2) - 1);
                 }
 
                 else
                 {
-                    var newDto = new DataTransferObject<TValue>(FirstCellInNode.GetCellByIndex(index).Value);
-                    FirstCellInNode.DeleteCellByIndex(index);
+                    var newDto = new DataTransferObject<TValue>(HeadCell.GetCellByIndex(index).Value);
+                    HeadCell.DeleteCellByIndex(index);
                     AddNewCellInNotFullNode(dto);
                     dto = newDto;
 
-                    var firstCellLeftNode = FirstCellInNode.GetCellByIndex((CountCellInNode / 2) - 1);
-                    rightNode.AddNewCellInNotFullNode(new DataTransferObject<TValue>(firstCellLeftNode.Value,
-                    firstCellLeftNode.NextCell, firstCellLeftNode.LeftNode, firstCellLeftNode.RightNode));
-                    FirstCellInNode.DeleteAllCellAfterIndex((CountCellInNode / 2));
+                    rightNode.HeadCell = HeadCell.GetCellByIndex((CountCellInNode / 2) - 1); ;
+
+                    HeadCell.DeleteAllCellAfterIndex((CountCellInNode / 2));
                 }
             }
 
@@ -237,57 +224,38 @@ where TValue : IComparable<TValue>
         return dto;
     }
 
-    public int SearchMedianValue(DataTransferObject<TValue> dto)
+    public int SearchMedianValue(TValue newValue)
     {
+        const int NEW_VALUE_INDEX = -1;
+        var halfCount = CountCellInNode / 2;
+        var possibleMiddleCellIndex = halfCount - 1;
+        var possibleMiddleCell = HeadCell.GetCellByIndex(possibleMiddleCellIndex);
+
         if (CountCellInNode % 2 == 0)
         {
-            if (dto.Value.CompareTo(FirstCellInNode.Value) == -1)
+            if (newValue.CompareTo(possibleMiddleCell.Value) < 0)
             {
-                return (CountCellInNode / 2) - 1;
+                return possibleMiddleCellIndex;
             }
 
-            else if (dto.Value.CompareTo(FirstCellInNode.GetCellByIndex(CountCellInNode - 1).Value) == 1 ||
-                dto.Value.CompareTo(FirstCellInNode.GetCellByIndex(CountCellInNode - 1).Value) == 0)
+            if (newValue.CompareTo(possibleMiddleCell.NextCell!.Value) >= 0)
             {
-                return CountCellInNode / 2;
+                return possibleMiddleCellIndex + 1;
             }
 
-            else
-            {
-                int leftMiddleIndex = CountCellInNode / 2 - 1;
-                int rightMiddleIndex = CountCellInNode / 2;
-                
-
-                if (dto.Value.CompareTo(FirstCellInNode.GetCellByIndex(leftMiddleIndex).Value) == -1)
-                {
-                    return leftMiddleIndex;
-                }
-                else if ((dto.Value.CompareTo(FirstCellInNode.GetCellByIndex(rightMiddleIndex).Value) == 1) ||
-                    (dto.Value.CompareTo(FirstCellInNode.GetCellByIndex(rightMiddleIndex).Value) == 0))
-                {
-                    return rightMiddleIndex;
-                }
-                else
-                {
-                    return -1;
-                }
-            }
+            return NEW_VALUE_INDEX;
         }
         else
         {
-            if (dto.Value.CompareTo(FirstCellInNode.GetCellByIndex((CountCellInNode / 2) - 1).Value) == 1 &&
-                dto.Value.CompareTo(FirstCellInNode.GetCellByIndex((CountCellInNode / 2) + 1).Value) == -1)
+            if (newValue.CompareTo(possibleMiddleCell.Value) > 0 &&
+                newValue.CompareTo(possibleMiddleCell.NextCell!.NextCell!.Value) < 0)
             {
-                return -1;
+                return NEW_VALUE_INDEX;
             }
-            else
-            {
-                return (CountCellInNode / 2);
-            }
+
+            return halfCount;
         }
     }
-
-
 }
 
 public class DataTransferObject<TValue>
