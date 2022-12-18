@@ -4,6 +4,8 @@
 public class Node<TValue>
 where TValue : IComparable<TValue>
 {
+    private Node<TValue>? parentNode;
+
     public Node(int relations, Cell<TValue>? cell = null)
     {
         MaxNumberCells = relations - 1;
@@ -11,7 +13,13 @@ where TValue : IComparable<TValue>
     }
     public int MaxNumberCells { get; }
     public Cell<TValue> HeadCell { get; private set; }
-    public Node<TValue>? ParentNode { get; private set; }
+    public Node<TValue>? ParentNode
+    {
+        get => parentNode; private set
+        {
+            parentNode = value;
+        }
+    }
     public int CountCellInNode => HeadCell.CountCell();
     public bool Odd => CountCellInNode % 2 == 0;
 
@@ -23,7 +31,6 @@ where TValue : IComparable<TValue>
         }
         else
         {
-
             DataTransferObject<TValue> newDto = DivisionNode(SearchMedianValue(dto.Value), dto);
 
             if (ParentNode != null)
@@ -32,11 +39,8 @@ where TValue : IComparable<TValue>
             }
             else
             {
-                Node<TValue> newHead = new Node<TValue>(
-                    MaxNumberCells + 1,
-                    new Cell<TValue>(newDto.Value, null, newDto.LeftNode, newDto.RightNode));
-                newDto.LeftNode.ParentNode = newHead;
-                newDto.RightNode.ParentNode = newHead;
+                Node<TValue> newHead = new Node<TValue>(MaxNumberCells + 1);
+                newHead.AddNewCellInNotFullNode(newDto);
                 return newHead;
             }
         }
@@ -92,7 +96,7 @@ where TValue : IComparable<TValue>
             dto.RightNode.ParentNode = this;
         }
 
-       return new Cell<TValue>(dto.Value, null, dto.LeftNode, dto.RightNode); 
+        return new Cell<TValue>(dto.Value, null, dto.LeftNode, dto.RightNode);
     }
 
     public void AddNewCellInNotFullNode(DataTransferObject<TValue> dto)

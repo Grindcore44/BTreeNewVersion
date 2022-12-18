@@ -178,7 +178,7 @@ public class UnitTest1
     {
         // arrange
 
-        var random = new Random((int)DateTime.Now.Ticks);
+        var random = new Random(5);
 
         var btree = new BTree<int>(9);
 
