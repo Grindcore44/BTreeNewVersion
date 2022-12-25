@@ -4,7 +4,7 @@ public static class Program
 {
     public static void Main()
     {
-        var btree = new BTree<int>(3);
+        var btree = new BTree<int>(4);
         btree.AddNewValue(50);
         btree.AddNewValue(40);
         btree.AddNewValue(60);

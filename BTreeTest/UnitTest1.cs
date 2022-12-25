@@ -99,7 +99,7 @@ public class UnitTest1
 
         var random = new Random((int)DateTime.Now.Ticks);
 
-        var btree = new BTree<int>(9);
+        var btree = new BTree<int>(3);
 
         // act
 

@@ -113,7 +113,9 @@ where TValue : IComparable<TValue>
             if (compareResult == -1)
             {
                 SetLeftNode(0, dto.RightNode);
+
                 HeadCell = HeadCell.AddFirst(CreateNewCell(dto));
+
             }
             else if (currentCell.NextCell != null)
             {
@@ -135,6 +137,7 @@ where TValue : IComparable<TValue>
                     {
                         SetRightNode(CountCellInNode - 1, dto.LeftNode);
                         HeadCell = HeadCell.AddLastCell(CreateNewCell(dto));
+
                         break;
                     }
                 }
@@ -156,23 +159,25 @@ where TValue : IComparable<TValue>
         HeadCell.GetCellByIndex(index).RightNode = node;
     }
 
-    public Node<TValue> FormBranchs(TValue value, Cell<TValue> cell)
+    public Node<TValue> FormBranchs(TValue value)
     {
         Node<TValue> rightNode = new Node<TValue>(MaxNumberCells + 1);
         var halfCount = CountCellInNode / 2;
         var beforeHalfCount = halfCount - 1;
         var cellByHalfcount = HeadCell.GetCellByIndex(halfCount);
-
         if (Odd || value.CompareTo(cellByHalfcount.Value) < 0)
         {
             rightNode.HeadCell = cellByHalfcount;
+
             HeadCell.DeleteAllCellAfterIndex(beforeHalfCount);
         }
         else
         {
-            rightNode.HeadCell = cell;
+            rightNode.HeadCell = cellByHalfcount.NextCell;
             HeadCell.DeleteAllCellAfterIndex(halfCount);
         }
+
+        rightNode.SetNewParent();
 
         return rightNode;
     }
@@ -180,8 +185,8 @@ where TValue : IComparable<TValue>
     public DataTransferObject<TValue> DivisionNode(int index, DataTransferObject<TValue> dto)
     {
         var halfCount = CountCellInNode / 2;
-        var cellByHalfcount = HeadCell.GetCellByIndex(halfCount);
-        DataTransferObject<TValue>? result = null;
+
+        DataTransferObject<TValue>? result;
 
         if (index > 0)
         {
@@ -189,11 +194,15 @@ where TValue : IComparable<TValue>
             HeadCell.DeleteCellByIndex(index);
             AddNewCellInNotFullNode(dto);
         }
-
-        result ??= new DataTransferObject<TValue>(dto.Value);
+        else
+        {
+            result = new DataTransferObject<TValue>(dto.Value);
+            SetRightNode(halfCount - 1, dto.LeftNode);
+            SetLeftNode(halfCount, dto.RightNode);
+        }
 
         result.LeftNode = this;
-        result.RightNode = FormBranchs(result.Value, cellByHalfcount.NextCell);
+        result.RightNode = FormBranchs(result.Value);
 
         return result;
     }
@@ -219,15 +228,28 @@ where TValue : IComparable<TValue>
 
             return NEW_VALUE_INDEX;
         }
-        else
+
+        if (newValue.CompareTo(possibleMiddleCell.Value) > 0 &&
+            newValue.CompareTo(possibleMiddleCell.NextCell!.NextCell!.Value) < 0)
         {
-            if (newValue.CompareTo(possibleMiddleCell.Value) > 0 &&
-                newValue.CompareTo(possibleMiddleCell.NextCell!.NextCell!.Value) < 0)
+            return NEW_VALUE_INDEX;
+        }
+
+        return halfCount;
+    }
+    private void SetNewParent()
+    {
+        var currentCell = HeadCell;
+
+        while (currentCell != null)
+        {
+            if (currentCell.LeftNode is not null)
             {
-                return NEW_VALUE_INDEX;
+                currentCell.LeftNode.ParentNode = this;
+                currentCell.RightNode.ParentNode = this;
             }
 
-            return halfCount;
+            currentCell = currentCell.NextCell;
         }
     }
 }

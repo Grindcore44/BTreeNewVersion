@@ -21,7 +21,7 @@ where TValue : IComparable<TValue>
     }
 
     public TValue Value { get; }
-    public Cell<TValue>? NextCell { get; private set; }
+    public Cell<TValue>? NextCell { get; set; }
     public Node<TValue>? LeftNode { get; set; }
     public Node<TValue>? RightNode { get; set; }
 
